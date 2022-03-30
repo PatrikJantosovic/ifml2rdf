@@ -43,8 +43,9 @@ public class TransformCommand implements Callable<Integer> {
     LOG.info("Reading from file: {}", path);
     try (var modifier = new OntologyModifierImpl(Path.of(target), iri, configuration)) {
       var source = new XmiParserImpl(Path.of(path), new IFMLFactory());
-      source.getIndividuals().forEach(modifier::addIndividual);
-      //source.getDataProperties().forEach(modifier::addDataProperty);
+      var individuals = source.getIndividuals();
+      individuals.forEach(modifier::addIndividual);
+      individuals.forEach(modifier::addDataProperty);
       //source.getObjectProperties().forEach(modifier::addObjectProperty);
     } catch (OWLOntologyStorageException | OWLOntologyCreationException e) {
       LOG.error("Failed to transform file ", e);

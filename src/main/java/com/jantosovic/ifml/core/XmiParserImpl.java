@@ -1,11 +1,13 @@
 package com.jantosovic.ifml.core;
 
+import com.jantosovic.ifml.api.DataProperty;
 import com.jantosovic.ifml.api.IFMLFactory;
 import com.jantosovic.ifml.api.NamedElement;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathConstants;
@@ -15,6 +17,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
@@ -37,8 +40,6 @@ public class XmiParserImpl implements XmiParser {
       documentBuilderFactory.setNamespaceAware(true);
       var documentBuilder = documentBuilderFactory.newDocumentBuilder();
       var document = documentBuilder.parse(path.toFile());
-
-      // http://stackoverflow.com/questions/13786607/normalization-in-dom-parsing-with-java-how-does-it-work
       document.getDocumentElement().normalize();
       return document;
     } catch (ParserConfigurationException | IOException | SAXException e) {
@@ -55,20 +56,34 @@ public class XmiParserImpl implements XmiParser {
         return attributes.item(idx).getNodeValue();
       }
     }
-    return null;
+    throw new IllegalStateException("ID missing for given element " + element.getLocalName());
   }
 
-  private static String getName(String id, Path pathToDoc) {
-    var doc = read(pathToDoc);
+  private static String getName(String id, Document doc) {
     var xPathfactory = XPathFactory.newInstance();
     var xpath = xPathfactory.newXPath();
     try {
       var x = "//*[@*[local-name()='id']='" + id + "']";
       var expr = xpath.compile(x);
       var nl = (Node) expr.evaluate(doc, XPathConstants.NODE);
-      return nl.getAttributes().getNamedItem("name").getTextContent();
+      var namedAttr = nl.getAttributes().getNamedItem("name");
+      if (namedAttr == null) {
+        throw new IllegalArgumentException("Name attribute missing in element.");
+      }
+      return namedAttr.getTextContent();
     } catch (XPathExpressionException e) {
       throw new IllegalArgumentException("Failed to fetch name value for element.", e);
+    }
+  }
+
+  private static void addAttributes(NamedNodeMap attrs, NamedElement object) {
+    for (int idx = 0; idx < attrs.getLength(); idx++) {
+      var name = attrs.item(idx).getLocalName();
+      var value = attrs.item(idx).getNodeValue();
+      if (name.startsWith("base_")) {
+        continue;
+      }
+      object.addDataProperty(new DataProperty(name, value));
     }
   }
 
@@ -85,9 +100,11 @@ public class XmiParserImpl implements XmiParser {
         if (node.getNodeType() == Node.ELEMENT_NODE) {
           var element = (Element) node;
           var id = getId(element);
-          var name = getName(id, path);
+          var name = getName(id, doc);
+          var attrs = element.getAttributes();
           LOG.debug("IFML element found: {}, with name: {} and id: {}", element.getTagName(), name, id);
           var object = ifmlFactory.createNamed(name, id, element);
+          addAttributes(attrs, object);
           result.add(object);
         }
       }

@@ -6,7 +6,7 @@ public interface OntologyModifier extends AutoCloseable {
 
   void addIndividual(NamedElement element);
 
-  void addDataProperty();
+  void addDataProperty(NamedElement element);
 
   void addObjectProperty();
 

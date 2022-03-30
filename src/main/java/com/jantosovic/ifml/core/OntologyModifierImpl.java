@@ -10,12 +10,12 @@ import org.semanticweb.owlapi.io.FileDocumentTarget;
 import org.semanticweb.owlapi.model.AddImport;
 import org.semanticweb.owlapi.model.IRI;
 import org.semanticweb.owlapi.model.OWLDataFactory;
+import org.semanticweb.owlapi.model.OWLDataProperty;
 import org.semanticweb.owlapi.model.OWLImportsDeclaration;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
-import org.springframework.stereotype.Component;
 
 public class OntologyModifierImpl implements OntologyModifier {
 
@@ -46,8 +46,8 @@ public class OntologyModifierImpl implements OntologyModifier {
 
   @Override
   public void addIndividual(NamedElement element) {
-    var individualName = element.getName();
     var className = element.getClass().getSimpleName();
+    var individualName = element.getName();
     var individualIRI = IRI.create(iri.toString() + '#' + individualName);
     LOG.debug("Individual IRI created as: {}", individualIRI);
     var individual = factory.getOWLNamedIndividual(individualIRI);
@@ -61,8 +61,16 @@ public class OntologyModifierImpl implements OntologyModifier {
   }
 
   @Override
-  public void addDataProperty() {
-
+  public void addDataProperty(NamedElement element) {
+    var individualName = element.getName();
+    var individualIRI = IRI.create(iri.toString() + '#' + individualName);
+    var individual = factory.getOWLNamedIndividual(individualIRI);
+    element.getDataProperties().forEach(dataProperty -> {
+      var owlDataProperty = factory.getOWLDataProperty(IRI.create(sourceIRI.toString() + '#' + dataProperty.getName()));
+      var dataPropertyAssertion = factory.getOWLDataPropertyAssertionAxiom(owlDataProperty, individual, dataProperty.getValue());
+      LOG.debug("Modifying {} with data-property {} and value {}.", individualName, dataProperty.getName(), dataProperty.getValue());
+      manager.addAxiom(ontology, dataPropertyAssertion);
+    });
   }
 
   @Override
