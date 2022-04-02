@@ -27,14 +27,10 @@
 
     <owl:NamedIndividual rdf:about="https://github.com/PatrikJantosovic/ifml-ontology/poc#Categories">
         <rdf:type rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/ifml#List"/>
-    </owl:NamedIndividual>
-    
-
-
-    <!-- https://github.com/PatrikJantosovic/ifml-ontology/poc#Category -->
-
-    <owl:NamedIndividual rdf:about="https://github.com/PatrikJantosovic/ifml-ontology/poc#Category">
-        <rdf:type rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/ifml#DataBinding"/>
+        <ifml:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Categories</ifml:name>
+        <ifml:id rdf:datatype="http://www.w3.org/2001/XMLSchema#string">EAID_253B61D2_018D_43b1_BF19_F02057525C42</ifml:id>
+        <ifml:hasViewContainer rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/poc#Homepage"/>
+        <ifml:hasOnSelectEvent rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/poc#OnSelectEvent"/>
     </owl:NamedIndividual>
     
 
@@ -43,24 +39,32 @@
 
     <owl:NamedIndividual rdf:about="https://github.com/PatrikJantosovic/ifml-ontology/poc#Homepage">
         <rdf:type rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/ifml#ViewContainer"/>
+        <ifml:id rdf:datatype="http://www.w3.org/2001/XMLSchema#string">EAID_316F284E_4634_4658_B348_3CD84861F74C</ifml:id>
+        <ifml:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Homepage</ifml:name>
         <ifml:isLandMark rdf:datatype="http://www.w3.org/2001/XMLSchema#string">false</ifml:isLandMark>
+        <ifml:isXor rdf:datatype="http://www.w3.org/2001/XMLSchema#string">false</ifml:isXor>
         <ifml:isDefault rdf:datatype="http://www.w3.org/2001/XMLSchema#string">true</ifml:isDefault>
     </owl:NamedIndividual>
     
 
 
-    <!-- https://github.com/PatrikJantosovic/ifml-ontology/poc#OnSubmitEvent -->
+    <!-- https://github.com/PatrikJantosovic/ifml-ontology/poc#MainMenu -->
 
-    <owl:NamedIndividual rdf:about="https://github.com/PatrikJantosovic/ifml-ontology/poc#OnSubmitEvent">
-        <rdf:type rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/ifml#OnSubmitEvent"/>
+    <owl:NamedIndividual rdf:about="https://github.com/PatrikJantosovic/ifml-ontology/poc#MainMenu">
+        <rdf:type rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/ifml#Menu"/>
+        <ifml:id rdf:datatype="http://www.w3.org/2001/XMLSchema#string">EAID_E51583A7_A6CE_4916_97F4_424117FD32CE</ifml:id>
+        <ifml:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">MainMenu</ifml:name>
+        <ifml:hasViewContainer rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/poc#Homepage"/>
     </owl:NamedIndividual>
     
 
 
-    <!-- https://github.com/PatrikJantosovic/ifml-ontology/poc#Product -->
+    <!-- https://github.com/PatrikJantosovic/ifml-ontology/poc#OnSelectEvent -->
 
-    <owl:NamedIndividual rdf:about="https://github.com/PatrikJantosovic/ifml-ontology/poc#Product">
-        <rdf:type rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/ifml#DataBinding"/>
+    <owl:NamedIndividual rdf:about="https://github.com/PatrikJantosovic/ifml-ontology/poc#OnSelectEvent">
+        <rdf:type rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/ifml#OnSelectEvent"/>
+        <ifml:id rdf:datatype="http://www.w3.org/2001/XMLSchema#string">EAID_EBFDA47A_2D69_487f_9826_3BB0A70420BA</ifml:id>
+        <ifml:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">OnSelectEvent</ifml:name>
     </owl:NamedIndividual>
     
 
@@ -69,6 +73,9 @@
 
     <owl:NamedIndividual rdf:about="https://github.com/PatrikJantosovic/ifml-ontology/poc#Recommended_Products">
         <rdf:type rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/ifml#List"/>
+        <ifml:id rdf:datatype="http://www.w3.org/2001/XMLSchema#string">EAID_B1DB7AC9_8643_4bfa_B145_125D427A0FA3</ifml:id>
+        <ifml:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Recommended_Products</ifml:name>
+        <ifml:hasViewContainer rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/poc#Homepage"/>
     </owl:NamedIndividual>
     
 
@@ -77,6 +84,9 @@
 
     <owl:NamedIndividual rdf:about="https://github.com/PatrikJantosovic/ifml-ontology/poc#Shopping_Cart">
         <rdf:type rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/ifml#Form"/>
+        <ifml:id rdf:datatype="http://www.w3.org/2001/XMLSchema#string">EAID_E69DE1F0_7808_41ea_BECE_C2C8B1BCAB40</ifml:id>
+        <ifml:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Shopping_Cart</ifml:name>
+        <ifml:hasViewContainer rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/poc#Homepage"/>
     </owl:NamedIndividual>
 </rdf:RDF>
 

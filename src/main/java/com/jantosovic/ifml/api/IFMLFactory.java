@@ -3,7 +3,6 @@ package com.jantosovic.ifml.api;
 import java.lang.reflect.InvocationTargetException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.stereotype.Component;
 import org.w3c.dom.Element;
 
 public final class IFMLFactory {
@@ -21,11 +20,6 @@ public final class IFMLFactory {
       var object = Class.forName(getClass().getPackageName() + '.' + element.getLocalName())
           .getConstructor(parameterTypes)
           .newInstance(args);
-      if (object instanceof ViewContainer) {
-        //object.setLandmark(Boolean.parseBoolean(element.getAttribute("isLandMark")));
-        //object.setDefault(Boolean.parseBoolean(element.getAttribute("isDefault")));
-        return (ViewContainer) object;
-      }
       return (NamedElement) object;
     } catch (InstantiationException | InvocationTargetException | NoSuchMethodException |
         ClassNotFoundException | IllegalAccessException e) {

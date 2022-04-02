@@ -1,7 +1,6 @@
 package com.jantosovic.ifml.api;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public abstract class InteractionFlowElement implements NamedElement {
@@ -9,12 +8,14 @@ public abstract class InteractionFlowElement implements NamedElement {
   private final String name;
   private final String id;
 
-  private final java.util.List<DataProperty> dataPropertyList;
+  private final java.util.List<DataProperty> dataProperties;
+  private final java.util.List<ObjectProperty> objectProperties;
 
   public InteractionFlowElement(String name, String id) {
     this.name = name;
     this.id = id;
-    dataPropertyList = new ArrayList<>();
+    dataProperties = new ArrayList<>();
+    objectProperties = new ArrayList<>();
   }
 
   /**
@@ -39,11 +40,35 @@ public abstract class InteractionFlowElement implements NamedElement {
 
   @Override
   public List<DataProperty> getDataProperties() {
-    return dataPropertyList;
+    return dataProperties;
   }
 
+  @Override
   public void addDataProperty(DataProperty dataProperty) {
-    this.dataPropertyList.add(dataProperty);
+    if (dataProperty!=null) {
+      this.dataProperties.add(dataProperty);
+    }
   }
 
+  @Override
+  public List<ObjectProperty> getObjectProperties() {
+    return this.objectProperties;
+  }
+
+  @Override
+  public void addObjectProperty(ObjectProperty objectProperty) {
+    if (objectProperty!=null) {
+      this.objectProperties.add(objectProperty);
+    }
+  }
+
+  @Override
+  public String toString() {
+    return "InteractionFlowElement{"
+        + "name='" + name + '\''
+        + ", id='" + id + '\''
+        + ", dataProperties=" + dataProperties
+        + ", objectProperties=" + objectProperties
+        + '}';
+  }
 }

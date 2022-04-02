@@ -3,11 +3,12 @@ package com.jantosovic.ifml.core;
 import com.jantosovic.ifml.api.DataProperty;
 import com.jantosovic.ifml.api.IFMLFactory;
 import com.jantosovic.ifml.api.NamedElement;
+import com.jantosovic.ifml.api.ObjectProperty;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Optional;
+import java.util.List;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathConstants;
@@ -22,6 +23,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+/**
+ * Implementation of XMI file parser.
+ */
 public class XmiParserImpl implements XmiParser {
 
   private final Path path;
@@ -77,14 +81,81 @@ public class XmiParserImpl implements XmiParser {
   }
 
   private static void addAttributes(NamedNodeMap attrs, NamedElement object) {
+    object.addDataProperty(new DataProperty("id", object.getId()));
+    object.addDataProperty(new DataProperty("name", object.getName()));
     for (int idx = 0; idx < attrs.getLength(); idx++) {
       var name = attrs.item(idx).getLocalName();
       var value = attrs.item(idx).getNodeValue();
       if (name.startsWith("base_")) {
+        // we use this one as ID and it is already resolved
         continue;
       }
       object.addDataProperty(new DataProperty(name, value));
     }
+  }
+
+  public List<ObjectProperty> getChildren(NamedElement element, Collection<? extends NamedElement> individuals) {
+    var result = new ArrayList<ObjectProperty>(1);
+    var doc = read(path);
+    var xPathfactory = XPathFactory.newInstance();
+    var xpath = xPathfactory.newXPath();
+    try {
+      var x = "//*[@*[local-name()='id']='" + element.getId() + "']";
+      var expr = xpath.compile(x);
+      var node = (Node) expr.evaluate(doc, XPathConstants.NODE);
+      var children = node.getChildNodes();
+      for (int idx = 0; idx < children.getLength(); idx++) {
+        var child = children.item(idx);
+        if (child.getNodeType() != Node.ELEMENT_NODE) {
+          continue;
+        }
+        var childId = child.getAttributes().getNamedItem("xmi:id").getNodeValue();
+        var childIndividual = individuals.stream()
+            .filter(individual -> individual.getId().equals(childId)) //verfy that child is actually IFML
+            .findFirst();
+        if (childIndividual.isPresent()) {
+          var childClassName = childIndividual.get().getClass().getSimpleName();
+          var name = "has" + childClassName;
+          var value = childIndividual.get().getName();
+          LOG.debug("Found Possible ObjectProperty for Individual {}, being: {} : {}",
+              element.getName(), name, value);
+          result.add(new ObjectProperty(name, value, childClassName));
+        }
+      }
+    } catch (XPathExpressionException e) {
+      LOG.error("Failed while looking for parent individual from XMI document.", e);
+      System.exit(1);
+    }
+    return result;
+  }
+
+  public ObjectProperty getParent(NamedElement element, Collection<? extends NamedElement> individuals) {
+    var doc = read(path);
+    var xPathfactory = XPathFactory.newInstance();
+    var xpath = xPathfactory.newXPath();
+    try {
+      var x = "//*[@*[local-name()='id']='" + element.getId() + "']";
+      var expr = xpath.compile(x);
+      var node = (Node) expr.evaluate(doc, XPathConstants.NODE);
+      var parentNode = node.getParentNode();
+      var parentId = parentNode.getAttributes().getNamedItem("xmi:id").getNodeValue();
+      var parent = individuals.stream()
+          .filter(individual -> individual.getId().equals(parentId)) //verfy that parent is actually IFML
+          .findFirst();
+      if (parent.isPresent()) {
+        var parentClassName = parent.get().getClass().getSimpleName();
+        var name = "has" + parentClassName;
+        var value = parent.get().getName();
+        // we will evaluate it against ifml owl metamodel before inserting
+        LOG.debug("Found Possible ObjectProperty for Individual {}, being: {} : {}",
+            element.getName(), name, value);
+        return new ObjectProperty(name, value, parentClassName);
+      }
+    } catch (XPathExpressionException e) {
+      LOG.error("Failed while looking for parent individual from XMI document.", e);
+      System.exit(1);
+    }
+    return null;
   }
 
   @Override
@@ -115,4 +186,11 @@ public class XmiParserImpl implements XmiParser {
     return result;
   }
 
+  @Override
+  public String toString() {
+    return "XmiParserImpl{"
+        + "path=" + path
+        + ", ifmlFactory=" + ifmlFactory
+        + '}';
+  }
 }

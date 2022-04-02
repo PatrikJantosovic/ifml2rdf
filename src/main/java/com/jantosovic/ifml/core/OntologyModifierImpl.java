@@ -1,17 +1,25 @@
 package com.jantosovic.ifml.core;
 
 import com.jantosovic.ifml.api.NamedElement;
+import com.jantosovic.ifml.api.ObjectProperty;
 import com.jantosovic.ifml.cmd.ApplicationConfiguration;
 import java.nio.file.Path;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.semanticweb.HermiT.Reasoner;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.FileDocumentTarget;
 import org.semanticweb.owlapi.model.AddImport;
 import org.semanticweb.owlapi.model.IRI;
+import org.semanticweb.owlapi.model.OWLClass;
+import org.semanticweb.owlapi.model.OWLClassExpression;
 import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLDataProperty;
-import org.semanticweb.owlapi.model.OWLImportsDeclaration;
+import org.semanticweb.owlapi.model.OWLNamedIndividual;
+import org.semanticweb.owlapi.model.OWLObjectProperty;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
@@ -24,9 +32,10 @@ public class OntologyModifierImpl implements OntologyModifier {
   private final Path target;
   private final OWLOntologyManager manager;
   private final OWLDataFactory factory;
+  private final OWLOntology metamodelOntology;
   private final OWLOntology ontology;
   private final IRI iri;
-  private final IRI sourceIRI;
+  private final IRI metamodelIRI;
 
   public OntologyModifierImpl(Path targetPath, String targetIRI, ApplicationConfiguration configuration)
       throws OWLOntologyCreationException {
@@ -34,14 +43,14 @@ public class OntologyModifierImpl implements OntologyModifier {
     this.manager = OWLManager.createOWLOntologyManager();
     this.factory = manager.getOWLDataFactory();
     // create new and import ontology
-    var sourceOntology = manager.loadOntologyFromOntologyDocument(configuration.getMetamodelPath());
+    this.metamodelOntology = manager.loadOntologyFromOntologyDocument(configuration.getMetamodelPath());
     this.iri = IRI.create(targetIRI);
-    this.sourceIRI = IRI.create(configuration.getMetamodelIri());
+    this.metamodelIRI = IRI.create(configuration.getMetamodelIri());
     // create our new ontology for individuals
     this.ontology = manager.createOntology(iri);
     // import ifml ontology
-    OWLImportsDeclaration im = factory.getOWLImportsDeclaration(sourceOntology.getOntologyID().getOntologyIRI());
-    manager.applyChange(new AddImport(ontology, im));
+    var importDeclaration = factory.getOWLImportsDeclaration(metamodelOntology.getOntologyID().getOntologyIRI());
+    manager.applyChange(new AddImport(ontology, importDeclaration));
   }
 
   @Override
@@ -51,31 +60,111 @@ public class OntologyModifierImpl implements OntologyModifier {
     var individualIRI = IRI.create(iri.toString() + '#' + individualName);
     LOG.debug("Individual IRI created as: {}", individualIRI);
     var individual = factory.getOWLNamedIndividual(individualIRI);
-    var classIRI = IRI.create(sourceIRI.toString() + '#' + className);
+    var classIRI = IRI.create(metamodelIRI.toString() + '#' + className);
     LOG.debug("Class IRI created as: {}", classIRI);
     var owlClass = factory.getOWLClass(classIRI);
     var classAssertionAxiom = factory.getOWLClassAssertionAxiom(owlClass, individual);
     LOG.debug("Adding Axiom {} to Ontology: {}", classAssertionAxiom, ontology);
     manager.addAxiom(ontology, classAssertionAxiom);
-    LOG.debug("Successfully added individual to Ontology: {}", ontology);
+    LOG.info("Successfully added individual to Ontology: {}", ontology);
   }
 
   @Override
-  public void addDataProperty(NamedElement element) {
+  public void addDataProperties(NamedElement element) {
     var individualName = element.getName();
     var individualIRI = IRI.create(iri.toString() + '#' + individualName);
     var individual = factory.getOWLNamedIndividual(individualIRI);
     element.getDataProperties().forEach(dataProperty -> {
-      var owlDataProperty = factory.getOWLDataProperty(IRI.create(sourceIRI.toString() + '#' + dataProperty.getName()));
+      var owlDataProperty = factory.getOWLDataProperty(IRI.create(metamodelIRI.toString() + '#' + dataProperty.getName()));
       var dataPropertyAssertion = factory.getOWLDataPropertyAssertionAxiom(owlDataProperty, individual, dataProperty.getValue());
-      LOG.debug("Modifying {} with data-property {} and value {}.", individualName, dataProperty.getName(), dataProperty.getValue());
+      LOG.info("Modifying {} with data-property {} and value {}.", individualName, dataProperty.getName(), dataProperty.getValue());
       manager.addAxiom(ontology, dataPropertyAssertion);
     });
   }
 
-  @Override
-  public void addObjectProperty() {
+  Collection<OWLClass> getSuperClasses(OWLClass owlClass) {
+    var reasoner = new Reasoner.ReasonerFactory().createReasoner(metamodelOntology);
+    return reasoner.getSuperClasses(owlClass, false).getFlattened();
+  }
 
+  Set<OWLObjectProperty> getObjectPropertiesForDomain(OWLClass owlClass) {
+    var classHierarchy = getSuperClasses(owlClass);
+    classHierarchy.add(owlClass);
+    var objectProperties = new HashSet<OWLObjectProperty>();
+    var knownObjectProperties = metamodelOntology.getObjectPropertiesInSignature();
+    classHierarchy.forEach(clazz -> {
+      knownObjectProperties.forEach(objectProperty -> {
+        var domains = new HashSet<OWLClass>();
+        objectProperty.getDomains(metamodelOntology).forEach(classExpression ->
+            domains.addAll(
+                classExpression
+                    .asDisjunctSet()
+                    .stream()
+                    .map(OWLClassExpression::asOWLClass)
+                    .collect(Collectors.toUnmodifiableSet())));
+        if (domains.contains(clazz)) {
+          objectProperties.add(objectProperty);
+        }
+      });
+    });
+   return objectProperties;
+  }
+
+  Set<OWLObjectProperty> getObjectPropertiesForRange(OWLClass owlClass) {
+    //var classHierarchy = getSuperClasses(owlClass);
+    var classHierarchy = new HashSet<OWLClass>(1);
+    classHierarchy.add(owlClass);
+    var objectProperties = new HashSet<OWLObjectProperty>();
+    var knownObjectProperties = metamodelOntology.getObjectPropertiesInSignature();
+    classHierarchy.forEach(clazz -> {
+      knownObjectProperties.forEach(objectProperty -> {
+        var domains = new HashSet<OWLClass>();
+        objectProperty.getRanges(metamodelOntology).forEach(classExpression ->
+            domains.addAll(
+                classExpression
+                    .asDisjunctSet()
+                    .stream()
+                    .map(OWLClassExpression::asOWLClass)
+                    .collect(Collectors.toUnmodifiableSet())));
+        if (domains.contains(clazz)) {
+          objectProperties.add(objectProperty);
+        }
+      });
+    });
+    return objectProperties;
+  }
+
+  private void addObjectProperty(OWLObjectProperty objectProperty,
+      OWLNamedIndividual sourceIndividual, String targetName) {
+    var targetIndividual = factory.getOWLNamedIndividual(
+          IRI.create(iri.toString() + '#' + targetName));
+    var objectPropertyAssertion = factory
+          .getOWLObjectPropertyAssertionAxiom(objectProperty, sourceIndividual, targetIndividual);
+    LOG.info("Modifying {} with object-property {} and value {}.", sourceIndividual,
+          objectProperty, targetIndividual);
+    manager.addAxiom(ontology, objectPropertyAssertion);
+  }
+
+  private OWLObjectProperty getOWLObjectProperty(ObjectProperty obj, String sourceClassName) {
+    var sourceClass = factory.getOWLClass(IRI.create(metamodelIRI.toString() + '#' + sourceClassName));
+    var targetClass = factory.getOWLClass(IRI.create(metamodelIRI.toString() + '#' + obj.getTargetClassName()));
+    var domainObjectProperties = getObjectPropertiesForDomain(sourceClass);
+    var rangeObjectProperties = getObjectPropertiesForRange(targetClass);
+    domainObjectProperties.retainAll(rangeObjectProperties);
+    return domainObjectProperties.stream().findFirst().orElse(null);
+  }
+
+  @Override
+  public void addObjectProperties(NamedElement element) {
+    var individualName = element.getName();
+    var individualIRI = IRI.create(iri.toString() + '#' + individualName);
+    var individual = factory.getOWLNamedIndividual(individualIRI);
+    element.getObjectProperties().forEach(objectProperty -> {
+      var owlObjectProperty = getOWLObjectProperty(objectProperty, element.getClass().getSimpleName());
+      if (owlObjectProperty != null) {
+        addObjectProperty(owlObjectProperty, individual, objectProperty.getValue());
+      }
+    });
   }
 
   @Override

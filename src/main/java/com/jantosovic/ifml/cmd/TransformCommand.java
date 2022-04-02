@@ -45,8 +45,14 @@ public class TransformCommand implements Callable<Integer> {
       var source = new XmiParserImpl(Path.of(path), new IFMLFactory());
       var individuals = source.getIndividuals();
       individuals.forEach(modifier::addIndividual);
-      individuals.forEach(modifier::addDataProperty);
-      //source.getObjectProperties().forEach(modifier::addObjectProperty);
+      individuals.forEach(modifier::addDataProperties);
+      individuals.forEach(individual -> {
+        individual.addObjectProperty(source.getParent(individual, individuals));
+      });
+      individuals.forEach(individual -> {
+        source.getChildren(individual, individuals).forEach(individual::addObjectProperty);
+      });
+      individuals.forEach(modifier::addObjectProperties);
     } catch (OWLOntologyStorageException | OWLOntologyCreationException e) {
       LOG.error("Failed to transform file ", e);
     }
