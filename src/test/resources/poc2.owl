@@ -1,0 +1,173 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="https://github.com/PatrikJantosovic/ifml-ontology/poc#"
+     xml:base="https://github.com/PatrikJantosovic/ifml-ontology/poc"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:ifml="https://github.com/PatrikJantosovic/ifml-ontology/ifml#">
+    <owl:Ontology rdf:about="https://github.com/PatrikJantosovic/ifml-ontology/poc">
+        <owl:imports rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/ifml"/>
+    </owl:Ontology>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Individuals
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- https://github.com/PatrikJantosovic/ifml-ontology/poc#Checkout -->
+
+    <owl:NamedIndividual rdf:about="https://github.com/PatrikJantosovic/ifml-ontology/poc#Checkout">
+        <rdf:type rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/ifml#OnSubmitEvent"/>
+        <ifml:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Checkout</ifml:name>
+        <ifml:id rdf:datatype="http://www.w3.org/2001/XMLSchema#string">EAID_AA646F95_9FA8_4d71_A632_4637E22FE5C2</ifml:id>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- https://github.com/PatrikJantosovic/ifml-ontology/poc#Confirm -->
+
+    <owl:NamedIndividual rdf:about="https://github.com/PatrikJantosovic/ifml-ontology/poc#Confirm">
+        <rdf:type rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/ifml#ActionEvent"/>
+        <ifml:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Confirm</ifml:name>
+        <ifml:id rdf:datatype="http://www.w3.org/2001/XMLSchema#string">EAID_41E3949F_D381_4bb3_8CD4_EBC6D55F9A9B</ifml:id>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- https://github.com/PatrikJantosovic/ifml-ontology/poc#Confirmation_Flow -->
+
+    <owl:NamedIndividual rdf:about="https://github.com/PatrikJantosovic/ifml-ontology/poc#Confirmation_Flow">
+        <rdf:type rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/ifml#NavigationFlow"/>
+        <ifml:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Confirmation_Flow</ifml:name>
+        <ifml:id rdf:datatype="http://www.w3.org/2001/XMLSchema#string">EAID_8D149EA2_EBDD_4bf3_B663_EF660364B4FF</ifml:id>
+        <ifml:hasSourceInteractionFlowElement rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/poc#Confirm"/>
+        <ifml:hasTargetInteractionFlowElement rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/poc#Order"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- https://github.com/PatrikJantosovic/ifml-ontology/poc#Order -->
+
+    <owl:NamedIndividual rdf:about="https://github.com/PatrikJantosovic/ifml-ontology/poc#Order">
+        <rdf:type rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/ifml#ViewContainer"/>
+        <ifml:id rdf:datatype="http://www.w3.org/2001/XMLSchema#string">EAID_93D373C0_9183_47e2_B694_1776B6B66970</ifml:id>
+        <ifml:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Order</ifml:name>
+        <ifml:isLandMark rdf:datatype="http://www.w3.org/2001/XMLSchema#string">false</ifml:isLandMark>
+        <ifml:isXor rdf:datatype="http://www.w3.org/2001/XMLSchema#string">false</ifml:isXor>
+        <ifml:isDefault rdf:datatype="http://www.w3.org/2001/XMLSchema#string">false</ifml:isDefault>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- https://github.com/PatrikJantosovic/ifml-ontology/poc#Order_Detail -->
+
+    <owl:NamedIndividual rdf:about="https://github.com/PatrikJantosovic/ifml-ontology/poc#Order_Detail">
+        <rdf:type rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/ifml#Details"/>
+        <ifml:id rdf:datatype="http://www.w3.org/2001/XMLSchema#string">EAID_2311CC7A_ED52_4c81_967A_95B35A677279</ifml:id>
+        <ifml:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Order_Detail</ifml:name>
+        <ifml:hasViewContainer rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/poc#Order"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- https://github.com/PatrikJantosovic/ifml-ontology/poc#Pay_For_Products -->
+
+    <owl:NamedIndividual rdf:about="https://github.com/PatrikJantosovic/ifml-ontology/poc#Pay_For_Products">
+        <rdf:type rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/ifml#Action"/>
+        <ifml:id rdf:datatype="http://www.w3.org/2001/XMLSchema#string">EAID_F916316E_5B0E_48ee_8F0B_088213A75B0B</ifml:id>
+        <ifml:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Pay_For_Products</ifml:name>
+        <ifml:hasActionEvent rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/poc#Confirm"/>
+        <ifml:hasParameter rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/poc#Price"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- https://github.com/PatrikJantosovic/ifml-ontology/poc#Price -->
+
+    <owl:NamedIndividual rdf:about="https://github.com/PatrikJantosovic/ifml-ontology/poc#Price">
+        <rdf:type rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/ifml#Parameter"/>
+        <ifml:id rdf:datatype="http://www.w3.org/2001/XMLSchema#string">EAID_43B567BE_8D40_483d_AD12_32E9F25B2D18</ifml:id>
+        <ifml:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Price</ifml:name>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- https://github.com/PatrikJantosovic/ifml-ontology/poc#PriceParameters -->
+
+    <owl:NamedIndividual rdf:about="https://github.com/PatrikJantosovic/ifml-ontology/poc#PriceParameters">
+        <rdf:type rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/ifml#ParameterBindingGroup"/>
+        <ifml:id rdf:datatype="http://www.w3.org/2001/XMLSchema#string">EAID_3D3A14B0_DCCE_460e_8C59_5C8FE8303276</ifml:id>
+        <ifml:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">PriceParameters</ifml:name>
+        <ifml:hasParameterBinding rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/poc#Total-Price"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- https://github.com/PatrikJantosovic/ifml-ontology/poc#Products -->
+
+    <owl:NamedIndividual rdf:about="https://github.com/PatrikJantosovic/ifml-ontology/poc#Products">
+        <rdf:type rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/ifml#List"/>
+        <ifml:id rdf:datatype="http://www.w3.org/2001/XMLSchema#string">EAID_D347F463_AD73_4cb6_B943_79A5FDE828EC</ifml:id>
+        <ifml:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Products</ifml:name>
+        <ifml:hasViewContainer rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/poc#Shopping_Cart"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- https://github.com/PatrikJantosovic/ifml-ontology/poc#Shopping_Cart -->
+
+    <owl:NamedIndividual rdf:about="https://github.com/PatrikJantosovic/ifml-ontology/poc#Shopping_Cart">
+        <rdf:type rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/ifml#ViewContainer"/>
+        <ifml:id rdf:datatype="http://www.w3.org/2001/XMLSchema#string">EAID_8DF702EF_608A_4e37_A37A_CC2B06E15DAA</ifml:id>
+        <ifml:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Shopping_Cart</ifml:name>
+        <ifml:isXor rdf:datatype="http://www.w3.org/2001/XMLSchema#string">false</ifml:isXor>
+        <ifml:isDefault rdf:datatype="http://www.w3.org/2001/XMLSchema#string">false</ifml:isDefault>
+        <ifml:isLandMark rdf:datatype="http://www.w3.org/2001/XMLSchema#string">true</ifml:isLandMark>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- https://github.com/PatrikJantosovic/ifml-ontology/poc#To_Payement_Flow -->
+
+    <owl:NamedIndividual rdf:about="https://github.com/PatrikJantosovic/ifml-ontology/poc#To_Payement_Flow">
+        <rdf:type rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/ifml#NavigationFlow"/>
+        <ifml:id rdf:datatype="http://www.w3.org/2001/XMLSchema#string">EAID_BB5259EA_0AA0_4962_8BBD_AEB09687FADA</ifml:id>
+        <ifml:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">To_Payement_Flow</ifml:name>
+        <ifml:hasSourceInteractionFlowElement rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/poc#Checkout"/>
+        <ifml:hasTargetInteractionFlowElement rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/poc#Pay_For_Products"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- https://github.com/PatrikJantosovic/ifml-ontology/poc#Total -->
+
+    <owl:NamedIndividual rdf:about="https://github.com/PatrikJantosovic/ifml-ontology/poc#Total">
+        <rdf:type rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/ifml#Field"/>
+        <ifml:id rdf:datatype="http://www.w3.org/2001/XMLSchema#string">EAID_F99F6792_A865_4372_9B6E_CE305DA79342</ifml:id>
+        <ifml:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Total</ifml:name>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- https://github.com/PatrikJantosovic/ifml-ontology/poc#Total-Price -->
+
+    <owl:NamedIndividual rdf:about="https://github.com/PatrikJantosovic/ifml-ontology/poc#Total-Price">
+        <rdf:type rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/ifml#ParameterBinding"/>
+        <ifml:id rdf:datatype="http://www.w3.org/2001/XMLSchema#string">EAID_EAB30D5B_2E2F_4019_8730_7ECBAC8FDC49</ifml:id>
+        <ifml:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Total-Price</ifml:name>
+    </owl:NamedIndividual>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 3.4.3-SNAPSHOT) http://owlapi.sourceforge.net -->
+

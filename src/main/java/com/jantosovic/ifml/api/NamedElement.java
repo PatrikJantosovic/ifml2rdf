@@ -9,7 +9,7 @@ public interface NamedElement {
 
   String getId();
 
-  // no benefit in strongly typing this and then casting and resolving nonsense..
+  // no benefit in strongly typing this and then casting and resolving..
   default List<DataProperty> getDataProperties() {
     return Collections.emptyList();
   }

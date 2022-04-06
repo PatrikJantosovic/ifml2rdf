@@ -2,6 +2,7 @@ package com.jantosovic.ifml.core;
 
 import com.jantosovic.ifml.api.DataProperty;
 import com.jantosovic.ifml.api.IFMLFactory;
+import com.jantosovic.ifml.api.InteractionFlow;
 import com.jantosovic.ifml.api.NamedElement;
 import com.jantosovic.ifml.api.ObjectProperty;
 import java.io.IOException;
@@ -153,6 +154,25 @@ public class XmiParserImpl implements XmiParser {
       }
     } catch (XPathExpressionException e) {
       LOG.error("Failed while looking for parent individual from XMI document.", e);
+      System.exit(1);
+    }
+    return null;
+  }
+
+  public String getFlowValue(NamedElement element, String attrNm) {
+    var objectProperties = new ArrayList<ObjectProperty>(2);
+    var doc = read(path);
+    var xPathfactory = XPathFactory.newInstance();
+    var xpath = xPathfactory.newXPath();
+    try {
+      var x = "//*[@*[local-name()='id']='" + element.getId() + "']";
+      var expr = xpath.compile(x);
+      var node = (Node) expr.evaluate(doc, XPathConstants.NODE);
+      var attrs = node.getAttributes();
+      var client = attrs.getNamedItem(attrNm).getNodeValue();
+      return getName(client, doc);
+    } catch (XPathExpressionException e) {
+      LOG.error("Failed while looking for dependency association from XMI document.", e);
       System.exit(1);
     }
     return null;

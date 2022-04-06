@@ -82,14 +82,15 @@ public class OntologyModifierImpl implements OntologyModifier {
     });
   }
 
-  Collection<OWLClass> getSuperClasses(OWLClass owlClass) {
+  Set<OWLClass> getSuperClasses(OWLClass owlClass) {
     var reasoner = new Reasoner.ReasonerFactory().createReasoner(metamodelOntology);
     return reasoner.getSuperClasses(owlClass, false).getFlattened();
   }
 
   Set<OWLObjectProperty> getObjectPropertiesForDomain(OWLClass owlClass) {
-    var classHierarchy = getSuperClasses(owlClass);
+    var classHierarchy = new HashSet<OWLClass>(1);
     classHierarchy.add(owlClass);
+    classHierarchy.addAll(getSuperClasses(owlClass));
     var objectProperties = new HashSet<OWLObjectProperty>();
     var knownObjectProperties = metamodelOntology.getObjectPropertiesInSignature();
     classHierarchy.forEach(clazz -> {
@@ -110,13 +111,10 @@ public class OntologyModifierImpl implements OntologyModifier {
    return objectProperties;
   }
 
-  Set<OWLObjectProperty> getObjectPropertiesForRange(OWLClass owlClass) {
-    //var classHierarchy = getSuperClasses(owlClass);
-    var classHierarchy = new HashSet<OWLClass>(1);
-    classHierarchy.add(owlClass);
+  private Set<OWLObjectProperty> traverseObjectPropertiesForRange(Set<OWLClass> owlClasses) {
     var objectProperties = new HashSet<OWLObjectProperty>();
     var knownObjectProperties = metamodelOntology.getObjectPropertiesInSignature();
-    classHierarchy.forEach(clazz -> {
+    owlClasses.forEach(clazz -> {
       knownObjectProperties.forEach(objectProperty -> {
         var domains = new HashSet<OWLClass>();
         objectProperty.getRanges(metamodelOntology).forEach(classExpression ->
@@ -134,7 +132,19 @@ public class OntologyModifierImpl implements OntologyModifier {
     return objectProperties;
   }
 
-  private void addObjectProperty(OWLObjectProperty objectProperty,
+  Set<OWLObjectProperty> getObjectPropertiesForRange(OWLClass owlClass) {
+    return traverseObjectPropertiesForRange(Set.of(owlClass));
+  }
+
+  public OWLObjectProperty getObjectPropertyByName(String name) {
+    return factory.getOWLObjectProperty(IRI.create(metamodelIRI.toString() + '#' + name));
+  }
+
+  public OWLNamedIndividual getIndividualByName(String name) {
+    return factory.getOWLNamedIndividual(IRI.create(iri.toString() + '#' + name));
+  }
+
+  public void addObjectProperty(OWLObjectProperty objectProperty,
       OWLNamedIndividual sourceIndividual, String targetName) {
     var targetIndividual = factory.getOWLNamedIndividual(
           IRI.create(iri.toString() + '#' + targetName));

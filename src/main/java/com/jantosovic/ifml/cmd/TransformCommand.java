@@ -1,6 +1,7 @@
 package com.jantosovic.ifml.cmd;
 
 import com.jantosovic.ifml.api.IFMLFactory;
+import com.jantosovic.ifml.api.InteractionFlow;
 import com.jantosovic.ifml.core.OntologyModifierImpl;
 import com.jantosovic.ifml.core.XmiParserImpl;
 import java.nio.file.Path;
@@ -43,16 +44,35 @@ public class TransformCommand implements Callable<Integer> {
     LOG.info("Reading from file: {}", path);
     try (var modifier = new OntologyModifierImpl(Path.of(target), iri, configuration)) {
       var source = new XmiParserImpl(Path.of(path), new IFMLFactory());
+      // read individuals and their attributes from XMI
       var individuals = source.getIndividuals();
+      // add individuals and data-properties to ontology
       individuals.forEach(modifier::addIndividual);
       individuals.forEach(modifier::addDataProperties);
+      // read child->parent object-properties
       individuals.forEach(individual -> {
         individual.addObjectProperty(source.getParent(individual, individuals));
       });
+      // read parent->child object-properties
       individuals.forEach(individual -> {
         source.getChildren(individual, individuals).forEach(individual::addObjectProperty);
       });
+      // add child<->parent object-properties to ontology
       individuals.forEach(modifier::addObjectProperties);
+      // read and add flow object-properties
+      individuals.forEach(individual -> {
+        if (individual instanceof InteractionFlow) {
+          modifier.addObjectProperty(
+              modifier.getObjectPropertyByName("hasSourceInteractionFlowElement"),
+              modifier.getIndividualByName(individual.getName()),
+              source.getFlowValue(individual, "client"));
+          modifier.addObjectProperty(
+              modifier.getObjectPropertyByName("hasTargetInteractionFlowElement"),
+              modifier.getIndividualByName(individual.getName()),
+              source.getFlowValue(individual, "supplier"));
+        }
+      });
+      // read and add binding object-properties
     } catch (OWLOntologyStorageException | OWLOntologyCreationException e) {
       LOG.error("Failed to transform file ", e);
     }
