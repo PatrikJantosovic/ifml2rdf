@@ -4,7 +4,6 @@ import com.jantosovic.ifml.api.NamedElement;
 import com.jantosovic.ifml.api.ObjectProperty;
 import com.jantosovic.ifml.cmd.ApplicationConfiguration;
 import java.nio.file.Path;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -137,11 +136,19 @@ public class OntologyModifierImpl implements OntologyModifier {
   }
 
   public OWLObjectProperty getObjectPropertyByName(String name) {
-    return factory.getOWLObjectProperty(IRI.create(metamodelIRI.toString() + '#' + name));
+    var objectPropertyIRI = IRI.create(metamodelIRI.toString() + '#' + name);
+    if (metamodelOntology.containsObjectPropertyInSignature(objectPropertyIRI)) {
+      return factory.getOWLObjectProperty(objectPropertyIRI);
+    }
+    throw new IllegalStateException("Object property not found for name: " + name);
   }
 
   public OWLNamedIndividual getIndividualByName(String name) {
-    return factory.getOWLNamedIndividual(IRI.create(iri.toString() + '#' + name));
+    var individulIri = IRI.create(iri.toString() + '#' + name);
+    if (ontology.containsIndividualInSignature(individulIri)) {
+      return factory.getOWLNamedIndividual(individulIri);
+    }
+    throw new IllegalStateException("Individual not found for name: " + name);
   }
 
   public void addObjectProperty(OWLObjectProperty objectProperty,
@@ -155,7 +162,7 @@ public class OntologyModifierImpl implements OntologyModifier {
     manager.addAxiom(ontology, objectPropertyAssertion);
   }
 
-  private OWLObjectProperty getOWLObjectProperty(ObjectProperty obj, String sourceClassName) {
+  private OWLObjectProperty inferOwlObjectProperty(ObjectProperty obj, String sourceClassName) {
     var sourceClass = factory.getOWLClass(IRI.create(metamodelIRI.toString() + '#' + sourceClassName));
     var targetClass = factory.getOWLClass(IRI.create(metamodelIRI.toString() + '#' + obj.getTargetClassName()));
     var domainObjectProperties = getObjectPropertiesForDomain(sourceClass);
@@ -170,7 +177,7 @@ public class OntologyModifierImpl implements OntologyModifier {
     var individualIRI = IRI.create(iri.toString() + '#' + individualName);
     var individual = factory.getOWLNamedIndividual(individualIRI);
     element.getObjectProperties().forEach(objectProperty -> {
-      var owlObjectProperty = getOWLObjectProperty(objectProperty, element.getClass().getSimpleName());
+      var owlObjectProperty = inferOwlObjectProperty(objectProperty, element.getClass().getSimpleName());
       if (owlObjectProperty != null) {
         addObjectProperty(owlObjectProperty, individual, objectProperty.getValue());
       }

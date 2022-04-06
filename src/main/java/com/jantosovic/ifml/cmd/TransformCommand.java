@@ -57,6 +57,16 @@ public class TransformCommand implements Callable<Integer> {
       individuals.forEach(individual -> {
         source.getChildren(individual, individuals).forEach(individual::addObjectProperty);
       });
+      // read and add binding object-properties
+      individuals.forEach(individual -> {
+        source.getBindingObjectProperties(individual, individuals)
+            .forEach(objectProperty ->
+                modifier.addObjectProperty(
+                    modifier.getObjectPropertyByName(objectProperty.getName()),
+                    modifier.getIndividualByName(individual.getName()),
+                    objectProperty.getValue()
+            ));
+      });
       // add child<->parent object-properties to ontology
       individuals.forEach(modifier::addObjectProperties);
       // read and add flow object-properties
@@ -72,7 +82,6 @@ public class TransformCommand implements Callable<Integer> {
               source.getFlowValue(individual, "supplier"));
         }
       });
-      // read and add binding object-properties
     } catch (OWLOntologyStorageException | OWLOntologyCreationException e) {
       LOG.error("Failed to transform file ", e);
     }

@@ -2,7 +2,6 @@ package com.jantosovic.ifml.core;
 
 import com.jantosovic.ifml.api.DataProperty;
 import com.jantosovic.ifml.api.IFMLFactory;
-import com.jantosovic.ifml.api.InteractionFlow;
 import com.jantosovic.ifml.api.NamedElement;
 import com.jantosovic.ifml.api.ObjectProperty;
 import java.io.IOException;
@@ -176,6 +175,35 @@ public class XmiParserImpl implements XmiParser {
       System.exit(1);
     }
     return null;
+  }
+
+  public Collection<ObjectProperty> getBindingObjectProperties(NamedElement individual, Collection<? extends NamedElement> individuals) {
+    var result = new ArrayList<ObjectProperty>(5);
+    var doc = read(path);
+    var xpath = XPathFactory.newInstance().newXPath();
+    try {
+      var expression = xpath.compile("//*[starts-with(name(), 'thecustomprofile')]");
+      var nodes = (NodeList) expression.evaluate(doc, XPathConstants.NODESET);
+      for (int idx = 0; idx < nodes.getLength(); idx++) {
+        var node = nodes.item(idx);
+        if (node.getNodeType() == Node.ELEMENT_NODE) {
+          var element = (Element) node;
+          var id = getId(element);
+          if (!id.equals(individual.getId())) {
+            // this belongs to another individual..
+            continue;
+          }
+          var name = element.getLocalName();
+          var value = element.getAttributes().getNamedItem(name).getNodeValue();
+          var targetClassName = individuals.stream().filter(i -> value.equals(i.getName())).findFirst();
+          result.add(new ObjectProperty(name, value, targetClassName.orElseThrow().getClass().getSimpleName()));
+        }
+      }
+    } catch (XPathExpressionException e) {
+      LOG.error("Failed while parsing binding object-property from XMI document.", e);
+      System.exit(1);
+    }
+    return result;
   }
 
   @Override

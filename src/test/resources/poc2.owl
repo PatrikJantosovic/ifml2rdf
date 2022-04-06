@@ -144,6 +144,7 @@
         <ifml:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">To_Payement_Flow</ifml:name>
         <ifml:hasSourceInteractionFlowElement rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/poc#Checkout"/>
         <ifml:hasTargetInteractionFlowElement rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/poc#Pay_For_Products"/>
+        <ifml:hasParameterBindingGroup rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/poc#PriceParameters"/>
     </owl:NamedIndividual>
     
 
@@ -164,6 +165,8 @@
         <rdf:type rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/ifml#ParameterBinding"/>
         <ifml:id rdf:datatype="http://www.w3.org/2001/XMLSchema#string">EAID_EAB30D5B_2E2F_4019_8730_7ECBAC8FDC49</ifml:id>
         <ifml:name rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Total-Price</ifml:name>
+        <ifml:hasTargetParameter rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/poc#Price"/>
+        <ifml:hasSourceParameter rdf:resource="https://github.com/PatrikJantosovic/ifml-ontology/poc#Total"/>
     </owl:NamedIndividual>
 </rdf:RDF>
 
