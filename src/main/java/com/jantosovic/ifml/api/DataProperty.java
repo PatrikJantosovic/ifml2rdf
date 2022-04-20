@@ -1,5 +1,9 @@
 package com.jantosovic.ifml.api;
 
+/**
+ * Internal representation of data-property.
+ * Read from XMI and transformed into OWLDataProperty.
+ */
 public final class DataProperty {
 
   private final String name;
@@ -26,5 +30,13 @@ public final class DataProperty {
    */
   public String getValue() {
     return value;
+  }
+
+  @Override
+  public String toString() {
+    return "DataProperty{"
+        + "name='" + name + '\''
+        + ", value='" + value + '\''
+        + '}';
   }
 }

@@ -1,14 +1,22 @@
 package com.jantosovic.ifml.api;
 
 import java.lang.reflect.InvocationTargetException;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.w3c.dom.Element;
 
+/**
+ * Factory method for IFML elements.
+ * Resolves XML element name and creates appropriate instance.
+ */
 public final class IFMLFactory {
 
-  private static final Logger LOG = LogManager.getLogger(IFMLFactory.class);
-
+  /**
+   * Creates instance of named element based on XML element supplied.
+   *
+   * @param name - value of attribute name
+   * @param id - value of attribute id
+   * @param element - element
+   * @return instance of named element
+   */
   public NamedElement createNamed(String name, String id, Element element) {
     try {
       var parameterTypes = new Class[2];
@@ -23,9 +31,7 @@ public final class IFMLFactory {
       return (NamedElement) object;
     } catch (InstantiationException | InvocationTargetException | NoSuchMethodException |
         ClassNotFoundException | IllegalAccessException e) {
-      LOG.error("Failed to initialize object for {}", element.getLocalName(), e);
-      System.exit(1);
-      return null;
+      throw new IllegalArgumentException("Failed to initialize object for " + element.getLocalName(), e);
     }
   }
 

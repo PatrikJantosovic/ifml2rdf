@@ -31,4 +31,12 @@ public class ApplicationConfiguration {
   public File getMetamodelPath() {
     return Path.of(metamodelPath).toFile();
   }
+
+  @Override
+  public String toString() {
+    return "ApplicationConfiguration{"
+        + "metamodelIri='" + metamodelIri + '\''
+        + ", metamodelPath='" + metamodelPath + '\''
+        + '}';
+  }
 }

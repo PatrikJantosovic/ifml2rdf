@@ -1,5 +1,9 @@
 package com.jantosovic.ifml.api;
 
+/**
+ * Internal representation of object-property.
+ * Read from XMI file, transformed into OWLObjectProperty.
+ */
 public final class ObjectProperty {
 
   private final String name;
@@ -37,5 +41,14 @@ public final class ObjectProperty {
    */
   public String getTargetClassName() {
     return targetClassName;
+  }
+
+  @Override
+  public String toString() {
+    return "ObjectProperty{"
+        + "name='" + name + '\''
+        + ", value='" + value + '\''
+        + ", targetClassName='" + targetClassName + '\''
+        + '}';
   }
 }

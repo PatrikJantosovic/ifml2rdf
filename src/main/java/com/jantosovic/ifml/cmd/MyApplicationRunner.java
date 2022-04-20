@@ -29,4 +29,13 @@ public class MyApplicationRunner implements CommandLineRunner, ExitCodeGenerator
   public int getExitCode() {
     return exitCode;
   }
+
+  @Override
+  public String toString() {
+    return "MyApplicationRunner{"
+        + "transformCommand=" + transformCommand
+        + ", factory=" + factory
+        + ", exitCode=" + exitCode
+        + '}';
+  }
 }

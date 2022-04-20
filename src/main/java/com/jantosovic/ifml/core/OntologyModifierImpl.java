@@ -24,7 +24,7 @@ import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
 import org.semanticweb.owlapi.model.OWLOntologyStorageException;
 
-public class OntologyModifierImpl implements OntologyModifier {
+public final class OntologyModifierImpl implements OntologyModifier {
 
   private static final Logger LOG = LogManager.getLogger(OntologyModifierImpl.class);
 
@@ -52,16 +52,44 @@ public class OntologyModifierImpl implements OntologyModifier {
     manager.applyChange(new AddImport(ontology, importDeclaration));
   }
 
+  public OWLNamedIndividual getIndividualByName(String name) {
+    var individulIri = IRI.create(iri.toString() + '#' + name);
+    if (ontology.containsIndividualInSignature(individulIri)) {
+      return factory.getOWLNamedIndividual(individulIri);
+    }
+    throw new IllegalStateException("Individual not found for name: " + name);
+  }
+
+  public OWLObjectProperty getObjectPropertyByName(String name) {
+    var objectPropertyIRI = IRI.create(metamodelIRI.toString() + '#' + name);
+    if (metamodelOntology.containsObjectPropertyInSignature(objectPropertyIRI)) {
+      return factory.getOWLObjectProperty(objectPropertyIRI);
+    }
+    throw new IllegalStateException("Object property not found for name: " + name);
+  }
+
+  private OWLClass getMetamodelClassByName(String name) {
+    var classIRI = IRI.create(metamodelIRI.toString() + '#' + name);
+    if (metamodelOntology.containsClassInSignature(classIRI)) {
+      return factory.getOWLClass(classIRI);
+    }
+    throw new IllegalStateException("Class not found for name: " + name);
+  }
+
+  public OWLNamedIndividual createIndividual(String name) {
+    var individulIri = IRI.create(iri.toString() + '#' + name);
+    return factory.getOWLNamedIndividual(individulIri);
+  }
+
+  private Set<OWLClass> getSuperClasses(OWLClass owlClass) {
+    var reasoner = new Reasoner.ReasonerFactory().createReasoner(metamodelOntology);
+    return reasoner.getSuperClasses(owlClass, false).getFlattened();
+  }
+
   @Override
   public void addIndividual(NamedElement element) {
-    var className = element.getClass().getSimpleName();
-    var individualName = element.getName();
-    var individualIRI = IRI.create(iri.toString() + '#' + individualName);
-    LOG.debug("Individual IRI created as: {}", individualIRI);
-    var individual = factory.getOWLNamedIndividual(individualIRI);
-    var classIRI = IRI.create(metamodelIRI.toString() + '#' + className);
-    LOG.debug("Class IRI created as: {}", classIRI);
-    var owlClass = factory.getOWLClass(classIRI);
+    var individual = createIndividual(element.getName());
+    var owlClass = getMetamodelClassByName(element.getClass().getSimpleName());
     var classAssertionAxiom = factory.getOWLClassAssertionAxiom(owlClass, individual);
     LOG.debug("Adding Axiom {} to Ontology: {}", classAssertionAxiom, ontology);
     manager.addAxiom(ontology, classAssertionAxiom);
@@ -70,23 +98,16 @@ public class OntologyModifierImpl implements OntologyModifier {
 
   @Override
   public void addDataProperties(NamedElement element) {
-    var individualName = element.getName();
-    var individualIRI = IRI.create(iri.toString() + '#' + individualName);
-    var individual = factory.getOWLNamedIndividual(individualIRI);
+    var individual = getIndividualByName(element.getName());
     element.getDataProperties().forEach(dataProperty -> {
       var owlDataProperty = factory.getOWLDataProperty(IRI.create(metamodelIRI.toString() + '#' + dataProperty.getName()));
       var dataPropertyAssertion = factory.getOWLDataPropertyAssertionAxiom(owlDataProperty, individual, dataProperty.getValue());
-      LOG.info("Modifying {} with data-property {} and value {}.", individualName, dataProperty.getName(), dataProperty.getValue());
+      LOG.info("Modifying {} with data-property {} and value {}.", individual, dataProperty.getName(), dataProperty.getValue());
       manager.addAxiom(ontology, dataPropertyAssertion);
     });
   }
 
-  Set<OWLClass> getSuperClasses(OWLClass owlClass) {
-    var reasoner = new Reasoner.ReasonerFactory().createReasoner(metamodelOntology);
-    return reasoner.getSuperClasses(owlClass, false).getFlattened();
-  }
-
-  Set<OWLObjectProperty> getObjectPropertiesForDomain(OWLClass owlClass) {
+  private Set<OWLObjectProperty> getObjectPropertiesForDomain(OWLClass owlClass) {
     var classHierarchy = new HashSet<OWLClass>(1);
     classHierarchy.add(owlClass);
     classHierarchy.addAll(getSuperClasses(owlClass));
@@ -131,24 +152,11 @@ public class OntologyModifierImpl implements OntologyModifier {
     return objectProperties;
   }
 
-  Set<OWLObjectProperty> getObjectPropertiesForRange(OWLClass owlClass) {
-    return traverseObjectPropertiesForRange(Set.of(owlClass));
-  }
-
-  public OWLObjectProperty getObjectPropertyByName(String name) {
-    var objectPropertyIRI = IRI.create(metamodelIRI.toString() + '#' + name);
-    if (metamodelOntology.containsObjectPropertyInSignature(objectPropertyIRI)) {
-      return factory.getOWLObjectProperty(objectPropertyIRI);
-    }
-    throw new IllegalStateException("Object property not found for name: " + name);
-  }
-
-  public OWLNamedIndividual getIndividualByName(String name) {
-    var individulIri = IRI.create(iri.toString() + '#' + name);
-    if (ontology.containsIndividualInSignature(individulIri)) {
-      return factory.getOWLNamedIndividual(individulIri);
-    }
-    throw new IllegalStateException("Individual not found for name: " + name);
+  private Set<OWLObjectProperty> getObjectPropertiesForRange(OWLClass owlClass) {
+    var classHierarchy = new HashSet<OWLClass>(1);
+    classHierarchy.add(owlClass);
+    classHierarchy.addAll(getSuperClasses(owlClass));
+    return traverseObjectPropertiesForRange(classHierarchy);
   }
 
   public void addObjectProperty(OWLObjectProperty objectProperty,
@@ -163,19 +171,27 @@ public class OntologyModifierImpl implements OntologyModifier {
   }
 
   private OWLObjectProperty inferOwlObjectProperty(ObjectProperty obj, String sourceClassName) {
-    var sourceClass = factory.getOWLClass(IRI.create(metamodelIRI.toString() + '#' + sourceClassName));
-    var targetClass = factory.getOWLClass(IRI.create(metamodelIRI.toString() + '#' + obj.getTargetClassName()));
+    var sourceClass = getMetamodelClassByName(sourceClassName);
+    var targetClass = getMetamodelClassByName(obj.getTargetClassName());
     var domainObjectProperties = getObjectPropertiesForDomain(sourceClass);
     var rangeObjectProperties = getObjectPropertiesForRange(targetClass);
     domainObjectProperties.retainAll(rangeObjectProperties);
-    return domainObjectProperties.stream().findFirst().orElse(null);
+    // when we have multiple results lets check if one of them is not exact match to the target class
+    if (domainObjectProperties.size() > 1) {
+      var possibleResults = new HashSet<>(domainObjectProperties);
+      var exactRangeMatch = traverseObjectPropertiesForRange(Set.of(targetClass));
+      possibleResults.retainAll(exactRangeMatch);
+      return possibleResults.stream().findFirst().orElseGet(
+          () -> domainObjectProperties.stream().findFirst().orElse(null));
+    }
+    return domainObjectProperties.stream()
+        .findFirst()
+        .orElse(null);
   }
 
   @Override
   public void addObjectProperties(NamedElement element) {
-    var individualName = element.getName();
-    var individualIRI = IRI.create(iri.toString() + '#' + individualName);
-    var individual = factory.getOWLNamedIndividual(individualIRI);
+    var individual = getIndividualByName(element.getName());
     element.getObjectProperties().forEach(objectProperty -> {
       var owlObjectProperty = inferOwlObjectProperty(objectProperty, element.getClass().getSimpleName());
       if (owlObjectProperty != null) {
@@ -188,4 +204,18 @@ public class OntologyModifierImpl implements OntologyModifier {
   public void close() throws OWLOntologyStorageException {
     manager.saveOntology(ontology, new FileDocumentTarget(target.toFile()));
   }
+
+  @Override
+  public String toString() {
+    return "OntologyModifierImpl{"
+        + "target=" + target
+        + ", manager=" + manager
+        + ", factory=" + factory
+        + ", metamodelOntology=" + metamodelOntology
+        + ", ontology=" + ontology
+        + ", iri=" + iri
+        + ", metamodelIRI=" + metamodelIRI
+        + '}';
+  }
+
 }

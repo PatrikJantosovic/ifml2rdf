@@ -18,21 +18,11 @@ public abstract class InteractionFlowElement implements NamedElement {
     objectProperties = new ArrayList<>();
   }
 
-  /**
-   * Value of field name.
-   *
-   * @return value of field name
-   */
   @Override
   public String getName() {
     return name;
   }
 
-  /**
-   * Value of field id.
-   *
-   * @return value of field id
-   */
   @Override
   public String getId() {
     return id;

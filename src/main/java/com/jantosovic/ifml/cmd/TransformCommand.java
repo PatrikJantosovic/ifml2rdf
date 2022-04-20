@@ -49,14 +49,12 @@ public class TransformCommand implements Callable<Integer> {
       // add individuals and data-properties to ontology
       individuals.forEach(modifier::addIndividual);
       individuals.forEach(modifier::addDataProperties);
-      // read child->parent object-properties
-      individuals.forEach(individual -> {
-        individual.addObjectProperty(source.getParent(individual, individuals));
-      });
       // read parent->child object-properties
       individuals.forEach(individual -> {
         source.getChildren(individual, individuals).forEach(individual::addObjectProperty);
       });
+      // add child<->parent object-properties to ontology
+      individuals.forEach(modifier::addObjectProperties);
       // read and add binding object-properties
       individuals.forEach(individual -> {
         source.getBindingObjectProperties(individual, individuals)
@@ -67,8 +65,6 @@ public class TransformCommand implements Callable<Integer> {
                     objectProperty.getValue()
             ));
       });
-      // add child<->parent object-properties to ontology
-      individuals.forEach(modifier::addObjectProperties);
       // read and add flow object-properties
       individuals.forEach(individual -> {
         if (individual instanceof InteractionFlow) {
@@ -89,4 +85,13 @@ public class TransformCommand implements Callable<Integer> {
     return 0;
   }
 
+  @Override
+  public String toString() {
+    return "TransformCommand{"
+        + "configuration=" + configuration
+        + ", path='" + path + '\''
+        + ", target='" + target + '\''
+        + ", iri='" + iri + '\''
+        + '}';
+  }
 }
