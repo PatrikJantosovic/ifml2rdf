@@ -1,7 +1,6 @@
 package com.jantosovic.ifml.cmd;
 
 import com.jantosovic.ifml.api.IFMLFactory;
-import com.jantosovic.ifml.api.InteractionFlow;
 import com.jantosovic.ifml.core.OntologyModifierImpl;
 import com.jantosovic.ifml.core.XmiParserImpl;
 import java.nio.file.Path;
@@ -43,7 +42,7 @@ public class TransformCommand implements Callable<Integer> {
   public Integer call() {
     LOG.info("Reading from file: {}", path);
     try (var modifier = new OntologyModifierImpl(Path.of(target), iri, configuration)) {
-      var source = new XmiParserImpl(Path.of(path), new IFMLFactory());
+      var source = new XmiParserImpl(Path.of(path), new IFMLFactory(modifier));
       // read individuals and their attributes from XMI
       var individuals = source.getIndividuals();
       // add individuals and data-properties to ontology
@@ -67,7 +66,7 @@ public class TransformCommand implements Callable<Integer> {
       });
       // read and add flow object-properties
       individuals.forEach(individual -> {
-        if (individual instanceof InteractionFlow) {
+        if (modifier.isInteractionFlow(individual)) {
           modifier.addObjectProperty(
               modifier.getObjectPropertyByName("hasSourceInteractionFlowElement"),
               modifier.getIndividualByName(individual.getName()),

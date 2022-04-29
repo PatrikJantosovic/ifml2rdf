@@ -1,6 +1,7 @@
 package com.jantosovic.ifml.core;
 
 import com.jantosovic.ifml.api.NamedElement;
+import org.semanticweb.owlapi.model.OWLClass;
 import org.semanticweb.owlapi.model.OWLNamedIndividual;
 import org.semanticweb.owlapi.model.OWLObjectProperty;
 
@@ -67,4 +68,20 @@ public interface OntologyModifier extends AutoCloseable {
    */
   void addObjectProperties(NamedElement element);
 
+  /**
+   * Returns OWLClass from metamodel for given name.
+   * Throws @IllegalStateException if not present.
+   *
+   * @param name of expected owl class
+   * @return owlClass with given name
+   */
+  OWLClass getMetamodelClassByName(String name);
+
+  /**
+   * Evaluates if owlClass of this individual is instance of InteractionFlow.
+   *
+   * @param individual to be evaluated
+   * @return true when is instance of InteractionFlow, otherwise false
+   */
+  boolean isInteractionFlow(NamedElement individual);
 }

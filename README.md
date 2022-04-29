@@ -3,8 +3,8 @@
 Simple transformation application used for converting IFML models into ontologies.
 
 ## Structure
-The application is divided into multiple packages. **API** package contains classes describing IFML elements, a class representing OWL data property structure, and a class representing OWL object property structure.
-The **cmd** package provides an entry point to the application through the **picocli** command-line interface and also implements spring configuration loading. Most of the logic resides in **core** package, with an XMI parser class and OWL modifier class, which are classes implementing the logic of reading information from IFML models in XMI format and writing them to the resulting files in RDF/OWL format.
+The application is divided into multiple packages. **API** package contains class describing IFML elements, a class representing OWL data property structure, and a class representing OWL object property structure.
+The **cmd** package provides an entry point to the application through the **picocli** command-line interface and also implements spring configuration loading. Most of the logic resides in **core** package, with an XMI parser class and OWL modifier class, which are classes implementing the logic of reading information from IFML models in XMI format and writing them to the resulting files in RDF/OWL or Turtle format.
 
 ## Input
 Application properties file requires path to IFML metamodel ontology and the IRI of the ontology.

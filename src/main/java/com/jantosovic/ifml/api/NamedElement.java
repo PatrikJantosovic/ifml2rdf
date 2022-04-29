@@ -2,6 +2,7 @@ package com.jantosovic.ifml.api;
 
 import java.util.Collections;
 import java.util.List;
+import org.semanticweb.owlapi.model.OWLClass;
 
 /**
  * NamedElement is IFML element whose descendants can be transformed.
@@ -22,6 +23,13 @@ public interface NamedElement {
    * @return id of ifml element
    */
   String getId();
+
+  /**
+   * Value of field metamodelOwlClass.
+   *
+   * @return value of field metamodelOwlClass
+   */
+  OWLClass getMetamodelOwlClass();
 
   /**
    * Returns all known data-properties of this individual.

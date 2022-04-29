@@ -63,14 +63,6 @@ public final class OntologyModifierImpl implements OntologyModifier {
     manager.applyChange(new AddImport(ontology, importDeclaration));
   }
 
-  private OWLClass getMetamodelClassByName(String name) {
-    var classIRI = IRI.create(metamodelIRI.toString() + '#' + name);
-    if (metamodelOntology.containsClassInSignature(classIRI)) {
-      return factory.getOWLClass(classIRI);
-    }
-    throw new IllegalStateException("Class not found for name: " + name);
-  }
-
   private Set<OWLClass> getSuperClasses(OWLClass owlClass) {
     var reasoner = new Reasoner.ReasonerFactory().createReasoner(metamodelOntology);
     return reasoner.getSuperClasses(owlClass, false).getFlattened();
@@ -128,8 +120,7 @@ public final class OntologyModifierImpl implements OntologyModifier {
     return traverseObjectPropertiesForRange(classHierarchy);
   }
 
-  private OWLObjectProperty inferOwlObjectProperty(ObjectProperty obj, String sourceClassName) {
-    var sourceClass = getMetamodelClassByName(sourceClassName);
+  private OWLObjectProperty inferOwlObjectProperty(ObjectProperty obj, OWLClass sourceClass) {
     var targetClass = getMetamodelClassByName(obj.getTargetClassName());
     var domainObjectProperties = getObjectPropertiesForDomain(sourceClass);
     var rangeObjectProperties = getObjectPropertiesForRange(targetClass);
@@ -174,11 +165,12 @@ public final class OntologyModifierImpl implements OntologyModifier {
   @Override
   public void addIndividual(NamedElement element) {
     var individual = createIndividual(element.getName());
-    var owlClass = getMetamodelClassByName(element.getClass().getSimpleName());
+    var owlClass = element.getMetamodelOwlClass();
     var classAssertionAxiom = factory.getOWLClassAssertionAxiom(owlClass, individual);
     LOG.debug("Adding Axiom {} to Ontology: {}", classAssertionAxiom, ontology);
     manager.addAxiom(ontology, classAssertionAxiom);
-    LOG.info("Successfully added individual to Ontology: {}", ontology);
+    LOG.info("Successfully added individual {}:{} to Ontology.",
+        element.getMetamodelOwlClass(), element.getName());
   }
 
   @Override
@@ -208,11 +200,28 @@ public final class OntologyModifierImpl implements OntologyModifier {
   public void addObjectProperties(NamedElement element) {
     var individual = getIndividualByName(element.getName());
     element.getObjectProperties().forEach(objectProperty -> {
-      var owlObjectProperty = inferOwlObjectProperty(objectProperty, element.getClass().getSimpleName());
+      var owlObjectProperty = inferOwlObjectProperty(objectProperty, element.getMetamodelOwlClass());
       if (owlObjectProperty != null) {
         addObjectProperty(owlObjectProperty, individual, objectProperty.getValue());
       }
     });
+  }
+
+  @Override
+  public OWLClass getMetamodelClassByName(String name) {
+    var classIRI = IRI.create(metamodelIRI.toString() + '#' + name);
+    if (metamodelOntology.containsClassInSignature(classIRI)) {
+      return factory.getOWLClass(classIRI);
+    }
+    throw new IllegalStateException("Class not found for name: " + name);
+  }
+
+  @Override
+  public boolean isInteractionFlow(NamedElement individual) {
+    var owlClass = individual.getMetamodelOwlClass();
+    var classHierarchy = getSuperClasses(owlClass);
+    var interactionFlowClass = getMetamodelClassByName("InteractionFlow");
+    return classHierarchy.contains(interactionFlowClass);
   }
 
   @Override

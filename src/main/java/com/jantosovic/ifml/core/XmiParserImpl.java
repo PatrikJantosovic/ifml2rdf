@@ -112,12 +112,12 @@ public final class XmiParserImpl implements XmiParser {
             .filter(individual -> individual.getId().equals(childId)) //verfy that child is actually IFML
             .findFirst();
         if (childIndividual.isPresent()) {
-          var childClassName = childIndividual.get().getClass().getSimpleName();
+          var childClassName = childIndividual.get().getMetamodelOwlClass().getIRI().getFragment();
           var name = "has" + childClassName;
           var value = childIndividual.get().getName();
           LOG.debug("Found Possible ObjectProperty for Individual {}, being: {} : {}",
               element.getName(), name, value);
-          result.add(new ObjectProperty(name, value, childClassName));
+          result.add(new ObjectProperty(name, value, childClassName.toString()));
         }
       }
       return result;
@@ -192,7 +192,7 @@ public final class XmiParserImpl implements XmiParser {
           var name = getName(id, xmlDocument);
           var attrs = element.getAttributes();
           LOG.debug("IFML element found: {}, with name: {} and id: {}", element.getTagName(), name, id);
-          var object = ifmlFactory.createNamed(name, id, element);
+          var object = ifmlFactory.createNamedElement(name, id, element);
           addAttributes(attrs, object);
           result.add(object);
         }

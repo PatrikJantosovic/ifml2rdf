@@ -2,18 +2,24 @@ package com.jantosovic.ifml.api;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.semanticweb.owlapi.model.OWLClass;
 
-public abstract class InteractionFlowElement implements NamedElement {
+/**
+ * Implementation of IFML:NamedElement and its descendants.
+ */
+public final class NamedElementImpl implements NamedElement {
 
   private final String name;
   private final String id;
+  private final OWLClass metamodelOwlClass;
 
-  private final java.util.List<DataProperty> dataProperties;
-  private final java.util.List<ObjectProperty> objectProperties;
+  private final List<DataProperty> dataProperties;
+  private final List<ObjectProperty> objectProperties;
 
-  public InteractionFlowElement(String name, String id) {
+  NamedElementImpl(String name, String id, OWLClass metamodelOwlClass) {
     this.name = name;
     this.id = id;
+    this.metamodelOwlClass = metamodelOwlClass;
     dataProperties = new ArrayList<>();
     objectProperties = new ArrayList<>();
   }
@@ -26,6 +32,11 @@ public abstract class InteractionFlowElement implements NamedElement {
   @Override
   public String getId() {
     return id;
+  }
+
+  @Override
+  public OWLClass getMetamodelOwlClass() {
+    return metamodelOwlClass;
   }
 
   @Override
@@ -42,7 +53,7 @@ public abstract class InteractionFlowElement implements NamedElement {
 
   @Override
   public List<ObjectProperty> getObjectProperties() {
-    return this.objectProperties;
+    return objectProperties;
   }
 
   @Override
@@ -54,9 +65,10 @@ public abstract class InteractionFlowElement implements NamedElement {
 
   @Override
   public String toString() {
-    return "InteractionFlowElement{"
+    return "NamedElementImpl{"
         + "name='" + name + '\''
         + ", id='" + id + '\''
+        + ", metamodelOwlClass=" + metamodelOwlClass
         + ", dataProperties=" + dataProperties
         + ", objectProperties=" + objectProperties
         + '}';
