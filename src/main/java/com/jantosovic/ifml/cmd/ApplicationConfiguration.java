@@ -14,6 +14,9 @@ public class ApplicationConfiguration {
   @Value( "${metamodel.path}" )
   private String metamodelPath;
 
+  @Value( "${model.syntax}" )
+  private String syntax;
+
   /**
    * Value of field metamodelIri.
    *
@@ -32,11 +35,21 @@ public class ApplicationConfiguration {
     return Path.of(metamodelPath).toFile();
   }
 
+  /**
+   * Value of field syntax.
+   *
+   * @return value of field syntax
+   */
+  public String getSyntax() {
+    return syntax;
+  }
+
   @Override
   public String toString() {
     return "ApplicationConfiguration{"
         + "metamodelIri='" + metamodelIri + '\''
         + ", metamodelPath='" + metamodelPath + '\''
+        + ", syntax='" + syntax + '\''
         + '}';
   }
 }

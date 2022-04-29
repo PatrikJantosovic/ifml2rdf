@@ -42,9 +42,9 @@ public interface XmiParser {
   /**
    * Get object-property representing binding relationship.
    *
-   * @param individual
-   * @param individuals
-   * @return
+   * @param individual element in binding relation
+   * @param individuals - all known IFML elements for validation
+   * @return binding object-properties for given element
    */
   Collection<ObjectProperty> getBindingObjectProperties(NamedElement individual,
       Collection<? extends NamedElement> individuals);

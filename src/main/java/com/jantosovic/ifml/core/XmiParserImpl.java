@@ -92,7 +92,8 @@ public final class XmiParserImpl implements XmiParser {
   }
 
   @Override
-  public List<ObjectProperty> getChildren(NamedElement element, Collection<? extends NamedElement> individuals) {
+  public List<ObjectProperty> getChildren(NamedElement element,
+      Collection<? extends NamedElement> individuals) {
     var xmlDocument = read(path);
     var xpath = XPathFactory.newInstance().newXPath();
     try {
@@ -142,7 +143,8 @@ public final class XmiParserImpl implements XmiParser {
   }
 
   @Override
-  public Collection<ObjectProperty> getBindingObjectProperties(NamedElement individual, Collection<? extends NamedElement> individuals) {
+  public Collection<ObjectProperty> getBindingObjectProperties(NamedElement individual,
+      Collection<? extends NamedElement> individuals) {
     var xmlDocument = read(path);
     var xpath = XPathFactory.newInstance().newXPath();
     try {
@@ -164,7 +166,8 @@ public final class XmiParserImpl implements XmiParser {
           var targetClassName = individuals.stream()
               .filter(namedElement -> value.equals(namedElement.getName()))
               .findFirst();
-          result.add(new ObjectProperty(name, value, targetClassName.orElseThrow().getClass().getSimpleName()));
+          result.add(new ObjectProperty(name, value,
+              targetClassName.orElseThrow().getClass().getSimpleName()));
         }
       }
       return result;
