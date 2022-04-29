@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.jantosovic.ifml</groupId>
 	<artifactId>ifml-transformation</artifactId>
-	<version>0.0.2-SNAPSHOT</version>
+	<version>0.0.2</version>
 	<name>ifml-transformation</name>
 	<description>IFML transformation to Ontology</description>
 	<properties>
